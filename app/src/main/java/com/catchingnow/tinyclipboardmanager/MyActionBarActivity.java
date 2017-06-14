@@ -22,7 +22,8 @@ import android.view.Window;
 import java.util.ArrayList;
 
 /**
- * Created by heruoxin on 15/2/28.
+ * Created by heruoxin
+ * on 15/2/28.
  */
 public class MyActionBarActivity extends AppCompatActivity {
     public static final String ACTIVITY_OPENED = "activity_opened";
@@ -34,10 +35,7 @@ public class MyActionBarActivity extends AppCompatActivity {
     //https://code.google.com/p/android/issues/detail?id=78154
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_MENU && "LGE".equalsIgnoreCase(Build.BRAND)) {
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
+        return keyCode == KeyEvent.KEYCODE_MENU && "LGE".equalsIgnoreCase(Build.BRAND) || super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -135,9 +133,12 @@ public class MyActionBarActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         if (keyboardListenersAttached) {
-            rootLayout.getViewTreeObserver().removeGlobalOnLayoutListener(keyboardLayoutListener);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(keyboardLayoutListener);
+            } else {
+                rootLayout.getViewTreeObserver().removeGlobalOnLayoutListener(keyboardLayoutListener);
+            }
         }
     }
 

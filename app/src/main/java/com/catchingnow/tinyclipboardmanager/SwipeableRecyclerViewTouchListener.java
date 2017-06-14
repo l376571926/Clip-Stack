@@ -20,7 +20,6 @@ package com.catchingnow.tinyclipboardmanager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.content.Context;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
@@ -30,7 +29,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,13 +60,13 @@ import java.util.List;
  * <p>This class Requires API level 12 or later due to use of {@link
  * android.view.ViewPropertyAnimator}.</p>
  */
-public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTouchListener {
+class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTouchListener {
     // Cached ViewConfiguration and system-wide constant values
     private int mSlop;
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
     private long ANIMATION_FAST = 300;
-    private long ANIMATION_WAIT = 2200;
+    private long ANIMATION_WAIT = 1000;
 
     // Fixed properties
     private RecyclerView mRecyclerView;
@@ -103,8 +101,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
      * @param recyclerView The recycler view whose items should be dismissable by swiping.
      * @param listener     The listener for the swipe events.
      */
-    public SwipeableRecyclerViewTouchListener(
-            Context context,
+    SwipeableRecyclerViewTouchListener(
             RecyclerView recyclerView,
             int fgID,
             int BgID,
@@ -124,7 +121,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
          * If a scroll listener is already assigned, the caller should still pass scroll changes through
          * to this listener.
          */
-        mRecyclerView.setOnScrollListener(new RecyclerView.OnScrollListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 setEnabled(newState != RecyclerView.SCROLL_STATE_DRAGGING);
@@ -141,7 +138,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
      *
      * @param enabled Whether or not to watch for gestures.
      */
-    public void setEnabled(boolean enabled) {
+    private void setEnabled(boolean enabled) {
         mPaused = !enabled;
     }
 
@@ -191,7 +188,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
                 if (mDownView != null) {
                     mDownX = motionEvent.getRawX();
                     mDownY = motionEvent.getRawY();
-                    mDownPosition = mRecyclerView.getChildPosition(mDownView);
+                    mDownPosition = mRecyclerView.getChildAdapterPosition(mDownView);
                     mVelocityTracker = VelocityTracker.obtain();
                     mVelocityTracker.addMovement(motionEvent);
                     mFgView = mDownView.findViewById(mFgID);
@@ -216,7 +213,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
                 mDownX = 0;
                 mDownY = 0;
                 mDownView = null;
-                mDownPosition = ListView.INVALID_POSITION;
+                mDownPosition = RecyclerView.NO_POSITION;
                 mSwiping = false;
                 mBgView = null;
                 break;
@@ -244,11 +241,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
                     dismiss = (velocityX < 0) == (mFinalDelta < 0);
                     dismissRight = mVelocityTracker.getXVelocity() > 0;
                 }
-                if (
-                        dismiss &&
-                                mDownPosition != ListView.INVALID_POSITION &&
-                                mSwipeListener.canSwipe(mDownPosition)
-                        ) {
+                if (dismiss && mDownPosition != RecyclerView.NO_POSITION && mSwipeListener.canSwipe(mDownPosition)) {
                     // dismiss
                     final View downView = mDownView; // mDownView gets null'd before animation ends
                     final int downPosition = mDownPosition;
@@ -277,7 +270,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
                 mDownX = 0;
                 mDownY = 0;
                 mDownView = null;
-                mDownPosition = ListView.INVALID_POSITION;
+                mDownPosition = RecyclerView.NO_POSITION;
                 mSwiping = false;
                 mBgView = null;
                 break;
@@ -345,7 +338,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
 
                 // Reset mDownPosition to avoid MotionEvent.ACTION_UP trying to start a dismiss
                 // animation with a stale position
-                mDownPosition = ListView.INVALID_POSITION;
+                mDownPosition = RecyclerView.NO_POSITION;
 
                 ViewGroup.LayoutParams lp;
                 for (PendingDismissData pendingDismiss : mPendingDismisses) {
@@ -380,7 +373,8 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
 
         //fade out background view
         backgroundView.animate()
-                .alpha(0).setDuration(ANIMATION_WAIT)
+                .alpha(0)
+                .setDuration(ANIMATION_WAIT)
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -409,7 +403,7 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
      * The callback interface used by {@link SwipeableRecyclerViewTouchListener} to inform its client
      * about a swipe of one or more list item positions.
      */
-    public interface SwipeListener {
+    interface SwipeListener {
         /**
          * Called to determine whether the given position can be swiped.
          */
@@ -427,10 +421,10 @@ public class SwipeableRecyclerViewTouchListener implements RecyclerView.OnItemTo
     }
 
     class PendingDismissData implements Comparable<PendingDismissData> {
-        public int position;
+        int position;
         public View view;
 
-        public PendingDismissData(int position, View view) {
+        PendingDismissData(int position, View view) {
             this.position = position;
             this.view = view;
         }
