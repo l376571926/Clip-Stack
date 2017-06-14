@@ -13,9 +13,8 @@ __MACOSX/
 # Others
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 /build
 app/manifest-merger-release-report.txt
 app/*.apk
 *.class
+.idea
