@@ -51,7 +51,6 @@ public class ActivityMain extends MyActionBarActivity {
     private RecyclerView mRecList;
     private LinearLayout mRecLayout;
     private ClipCardAdapter clipCardAdapter;
-    private LinearLayoutManager linearLayoutManager;
     protected Toolbar mToolbar;
     private ImageButton mFAB;
     private SearchView searchView;
@@ -583,13 +582,12 @@ public class ActivityMain extends MyActionBarActivity {
 
     private void initView() {
         //init View
-
         mRecLayout.removeAllViewsInLayout();
         LayoutInflater layoutInflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.view_main_recycler, mRecLayout, true);
         mRecList = (RecyclerView) findViewById(R.id.cardList);
         mRecList.setHasFixedSize(true);
-        linearLayoutManager = new LinearLayoutManager(this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecList.setLayoutManager(linearLayoutManager);
 
@@ -734,7 +732,7 @@ public class ActivityMain extends MyActionBarActivity {
         Thread.sleep(50);
         db.modifyClip(null, getString(R.string.first_launch_clipboards_2, "🙋"));
         Thread.sleep(50);
-        db.modifyClip(null, getString(R.string.first_launch_clipboards_1, "😄"), 1);
+        db.modifyClip(null, getString(R.string.first_launch_clipboards_1), 1);
         Thread.sleep(50);
         db.modifyClip(null, getString(R.string.first_launch_clipboards_0, "😄"), 1);
 //        BackupManager backupManager = new BackupManager(this);

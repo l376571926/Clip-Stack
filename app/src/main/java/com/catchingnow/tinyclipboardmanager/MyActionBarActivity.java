@@ -4,13 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.internal.widget.TintImageView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -25,7 +24,7 @@ import java.util.ArrayList;
 /**
  * Created by heruoxin on 15/2/28.
  */
-public class MyActionBarActivity extends ActionBarActivity {
+public class MyActionBarActivity extends AppCompatActivity {
     public static final String ACTIVITY_OPENED = "activity_opened";
     public static final String ACTIVITY_CLOSED = "activity_closed";
 
@@ -201,13 +200,12 @@ public class MyActionBarActivity extends ActionBarActivity {
         viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                final ArrayList<View> outViews = new ArrayList<View>();
-                decorView.findViewsWithText(outViews, overflowDescription,
-                        View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
+                final ArrayList<View> outViews = new ArrayList<>();
+                decorView.findViewsWithText(outViews, overflowDescription, View.FIND_VIEWS_WITH_CONTENT_DESCRIPTION);
                 if (outViews.isEmpty()) {
                     return;
                 }
-                TintImageView overflow=(TintImageView) outViews.get(0);
+                AppCompatImageView overflow = (AppCompatImageView) outViews.get(0);
                 //overflow.setColorFilter(Color.CYAN);
                 overflow.setImageResource(imageID);
                 removeOnGlobalLayoutListener(decorView, this);
@@ -217,9 +215,12 @@ public class MyActionBarActivity extends ActionBarActivity {
 
     public static void removeOnGlobalLayoutListener(View v, ViewTreeObserver.OnGlobalLayoutListener listener) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
-        }
-        else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
+            } else {
+                v.getViewTreeObserver().removeGlobalOnLayoutListener(listener);
+            }
+        } else {
             v.getViewTreeObserver().removeOnGlobalLayoutListener(listener);
         }
     }
